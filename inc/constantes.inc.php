@@ -59,7 +59,7 @@ if( $flag_prod) {
   define('DB_HOST', 'localhost');
   define('DB_USER', 'root');
   define('DB_PASS', '');
-  define('DB_BASE', 'geo');
+  define('DB_BASE', 'base');
 
   // Configuration envoi de mail
   define("SMTP_HOST", "");
@@ -76,10 +76,9 @@ if( $flag_prod) {
   define('DB_HOST', 'localhost');
   define('DB_USER', 'root');
   define('DB_PASS', '');
-  define('DB_BASE', 'geo');
-	//
+  define('DB_BASE', 'borderlines');
 
-	define("SMTP_HOST", "mail.club-internet.fr");
+  define("SMTP_HOST", "");
   define("SMTP_USER", "");
   define("SMTP_PASS", "");
 }
@@ -91,7 +90,7 @@ if( $flag_prod) {
 // ID du membre administrateur
 define("ID_ADMIN", 1);
 // Niveau utilisateur d'administration
-define("ADMIN_LEVEL", 2);
+define("ADMIN_LEVEL", 1);
 // Longueur des lignes d'un mail texte
 define('MAIL_WORDWRAP', 80);
 
