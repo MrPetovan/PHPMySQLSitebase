@@ -324,6 +324,16 @@ WHERE `id` = ".mysql_ureal_escape_string($this->get_id());
       return mysql_uquery($sql);
     }
 
+    public static function db_truncate() {
+      $sql = "DELETE FROM `".static::get_table_name()."`";
+
+      if( isset( self::$object_array[ get_called_class() ])) {
+        unset( self::$object_array[ get_called_class() ] );
+      }
+
+      return mysql_uquery($sql);
+    }
+
     /**
      * Fonction retournant une liste de tous les objets d'une table
      *
@@ -514,6 +524,7 @@ WHERE `id` = ".mysql_ureal_escape_string($this->get_id());
       
       foreach ($post_data as $name => $value) {
         $sql_name = '_'.$name;
+        
         if($name != "id" && property_exists( $this, $sql_name ) ) {
           $this->__set($name, $value);
         }

@@ -158,10 +158,8 @@
 
   define('PAGE_CODE', $PAGE_CODE);
   // ACT
-  if($flag_action) {
-    if($CURRENT_PAGE->get_act()) {
-      include($CURRENT_PAGE->get_act());
-    }
+  if($CURRENT_PAGE->get_act()) {
+    include($CURRENT_PAGE->get_act());
   }
 
   //DSP
