@@ -3,8 +3,8 @@
 
   $page_no = getValue('p', 1);
   $nb_per_page = NB_PER_PAGE;
-  $tab = <?php echo $class_php_identifier ?>::db_get_all($page_no, $nb_per_page);
-  $nb_total = <?php echo $class_php_identifier ?>::db_count_all();
+  $tab = <?php echo $class_php_identifier ?>::db_get_all($page_no, $nb_per_page, true);
+  $nb_total = <?php echo $class_php_identifier ?>::db_count_all(true);
 
     echo '
 <div class="texte_contenu">';
@@ -60,7 +60,7 @@ foreach( $table_columns as $column_name => $column_props ) {
       case 'time':
       case 'date':
         echo "
-          <td>'.guess_date($".$class_db_identifier."->get_".$column_name."(), GUESS_DATE_FR).'</td>";
+          <td>'.guess_time($".$class_db_identifier."->get_".$column_name."(), GUESS_DATE_FR).'</td>";
         break;
       case 'tinyint' :
         echo "

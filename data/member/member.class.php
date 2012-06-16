@@ -31,13 +31,9 @@ class Member extends DBObject {
   // Champs BD
   protected $_prenom = '';
   protected $_nom = '';
-  protected $_adresse = '';
-  protected $_ville = '';
-  protected $_code_postal = '';
   protected $_pays = '';
   protected $_genre = 'F';
   protected $_date_naissance = '';
-  protected $_num_tel_portable = '';
   protected $_email = '';
   protected $_password = '';
   protected $_niveau = 0;
@@ -75,20 +71,20 @@ class Member extends DBObject {
   }
 
 	/* ACCESSEURS */
-  public static function get_table_name() {
-    return "membre";
-  }
+  public static function get_table_name() { return "member";}
 
-  public function get_date_naissance()    { return guess_date($this->_date_naissance);}
-  public function get_date_inscription()  { return guess_date($this->_date_inscription);}
-  public function get_date_connexion()    { return guess_date($this->_date_connexion);}
+  public function get_name()    { return $this->_prenom.' '.$this->nom;}
+
+  public function get_date_naissance()    { return guess_time($this->_date_naissance);}
+  public function get_date_inscription()  { return guess_time($this->_date_inscription);}
+  public function get_date_connexion()    { return guess_time($this->_date_connexion);}
 
   public function is_visible() { return ($this->visible == 1); }
 
   /* MUTATEURS */
-  public function set_date_naissance($date) { $this->_date_naissance = guess_date($date, GUESS_DATE_MYSQL);}
-  public function set_date_inscription($date) { $this->_date_inscription = guess_date($date, GUESS_DATE_MYSQL);}
-  public function set_date_connexion($date) { $this->_date_connexion = guess_date($date, GUESS_DATE_MYSQL);}
+  public function set_date_naissance($date) { $this->_date_naissance = guess_time($date, GUESS_DATE_MYSQL);}
+  public function set_date_inscription($date) { $this->_date_inscription = guess_time($date, GUESS_DATE_MYSQL);}
+  public function set_date_connexion($date) { $this->_date_connexion = guess_time($date, GUESS_DATE_MYSQL);}
 
   public function set_password($password, $is_crypted = true) {
     if($is_crypted) {
@@ -193,10 +189,8 @@ class Member extends DBObject {
    */
   public static function get_tab_level() {
     return array(
-      0 => "Prospect",
-      1 => "Utilisateur",
-      2 => "Administrateur",
-      3 => "Intranet/RP"
+      0 => "Utilisateur",
+      1 => "Administrateur"
     );
   }
 
@@ -371,16 +365,7 @@ AND ".$attribute." <= $str_fin";
           <p class="field">'.HTMLHelper::genererInputPassword('password_admin', null, array(), 'Changer le mot de passe' ).'</p>';
     }
 
-
-    if( MEMBER_FORM_ABONNEMENT == $type || MEMBER_FORM_ADMIN == $type ) {
-      $return .= '
-          <p class="field">'.HTMLHelper::genererInputText('adresse', $this->get_adresse(), array(), "Adresse" ).'</p>';
-    }
     if( MEMBER_FORM_ABONNEMENT == $type || MEMBER_FORM_NEWSLETTER == $type || MEMBER_FORM_ADMIN == $type) {
-      $return .= '
-          <p class="field">'.HTMLHelper::genererInputText('code_postal', $this->get_code_postal(), array(), 'Code Postal <span class="oblig">*</span>' ).'</p>';
-      $return .= '
-          <p class="field">'.HTMLHelper::genererInputText('ville', $this->get_ville(), array(), "Ville" ).'</p>';
       $return .= '
           <p class="field">';
       $liste_pays = array(
@@ -418,10 +403,6 @@ AND ".$attribute." <= $str_fin";
       'CH' => 'Suisse',
       '--' => '-- Autre');
       $return .= HTMLHelper::genererSelect('pays', $liste_pays, $this->get_pays(), array(), 'Pays <span class="oblig">*</span>').'</p>';
-    }
-    if( MEMBER_FORM_ABONNEMENT == $type || MEMBER_FORM_ADMIN == $type) {
-      $return .= '
-          <p class="field">'.HTMLHelper::genererInputText('num_tel_portable', $this->get_num_tel_portable(), array(), "N° téléphone portable" ).'</p>';
     }
     if( MEMBER_FORM_ABONNEMENT == $type || MEMBER_FORM_NEWSLETTER == $type || MEMBER_FORM_ADMIN == $type) {
       $liste_jour = array('' => '--');

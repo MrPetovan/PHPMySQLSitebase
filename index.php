@@ -61,10 +61,10 @@
   require_once(INC.'constantes.inc.php');
   // Fonctions MySQL
   require_once(INC.'db.inc.php');
-  // Fonctions liées aux pages
-  require_once(INC.'page.inc.php');
   // Fonctions générales
   require_once(INC.'fonctions.inc.php');
+  // Fonctions liées aux pages
+  require_once(INC.'page.inc.php');
   // Fonctions système de fichier
   require_once(INC.'files.inc.php');
   // Fonctions envoi de mail

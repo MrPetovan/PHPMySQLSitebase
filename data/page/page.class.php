@@ -53,35 +53,24 @@ class Page extends DBObject {
    * @param int $type
    */
   public static function set_message( $message, $type = self::PAGE_MESSAGE_NOTICE ) {
-    $_SESSION['page']['message_text'] = $message;
-    $_SESSION['page']['message_type'] = $type;
+    self::add_message( $message, $type );
   }
-  public static function get_message( $message, $type = self::PAGE_MESSAGE_NOTICE ) {
+  
+  public static function add_message( $message, $type = self::PAGE_MESSAGE_NOTICE ) {
+    $_SESSION['page']['message'][$type][] = $message;
+  }
+
+  public static function get_message( $type = self::PAGE_MESSAGE_NOTICE ) {
     $return = false;
 
-    if( isset( $_SESSION['page']['message_text'] ) &&
-        isset(  $_SESSION['page']['message_type'])) {
-      $return = array( 'text' => $_SESSION['page']['message_text'],
-                       'type' => $_SESSION['page']['message_type'] );
-      unset( $_SESSION['page']['message_text'] );
-      unset( $_SESSION['page']['message_type'] );
+    if( isset( $_SESSION['page']['message'][$type] ) ) {
+      $return = $_SESSION['page']['message'][$type];
+      unset( $_SESSION['page']['message'][$type] );
     }
     return $return;
   }
 
   /* FONCTIONS SQL */
-
-  public static function db_exists ($id) { return self::db_exists_class($id, get_class());}
-  public static function db_get_by_id($id) { return self::db_get_by_id_class($id, get_class());}
-
-  public static function db_get_all() {
-    $return = array();
-
-    $sql = 'SELECT `id` FROM `'.self::get_table_name().'` ORDER BY `code`';
-
-    return self::sql_to_list($sql, get_class());
-  }
-
   public static function db_get_page_by_code($code) {
     $return = false;
 
@@ -90,7 +79,7 @@ SELECT `id` FROM `".self::get_table_name()."`
 WHERE `code` LIKE ".mysql_ureal_escape_string($code)."
 LIMIT 0,1";
 
-    return self::sql_to_object($sql, get_class());
+    return self::sql_to_object($sql);
   }
 
   public static function db_get_by_tpl($token) {
@@ -101,13 +90,10 @@ SELECT `id` FROM `".self::get_table_name()."`
 WHERE `remember_token` LIKE ".mysql_ureal_escape_string($token)."
 LIMIT 0,1";
 
-    return self::sql_to_object($sql, get_class());
+    return self::sql_to_object($sql);
   }
 
   /* FONCTIONS HTML */
-
-  public static function manage_errors($tab_error, &$html_msg) { return self::manage_errors_class($tab_error, $html_msg, get_class());}
-
   public function html_get_form($form_url, $post = array()) {
     if(isset($post['code']))
       { $code = $post['code']; }             else { $code = $this->get_code(); }
@@ -234,8 +220,10 @@ LIMIT 0,1";
             $return .= "&";
           }
         }
+        
         if(count($params)) {
           //param1=value1&param2=value2...
+          $params_url = array();
           foreach($params as $name => $value) {
             $params_url[] = $name."=".$value;
           }

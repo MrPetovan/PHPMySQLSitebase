@@ -12,14 +12,6 @@
   $nb_total = Member::db_count_all();
 
     echo '
-<!--<div class="texte_header">
-  <p class="bandeau">Administration</p>
-  <img src="'.IMG.'img_html/13login_header.jpg" alt=""/>
-  <div class="edito">
-    <h2>Administration des utilisateurs</h2>
-    <p>Vous pouvez modifier les données des utilisateurs. Attention, les changements sont irréversibles.</p>
-  </div>
-</div>-->
 <div class="texte_contenu">';
 
 	admin_menu(PAGE_CODE);
@@ -37,6 +29,7 @@
           <th>Email</th>
           <th>Niveau</th>
           <th>Inscription</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tfoot>
@@ -54,7 +47,7 @@
           <td><a href="'.htmlentities_utf8(get_page_url('admin_member_view', true, array('id' => $member->get_id()))).'">'.$member->get_prenom().' '.$member->get_nom().'</a></td>
           <td>'.$member->get_email().'</td>
           <td>'.$tab_level[$member->get_niveau()].'</td>
-          <td>'.guess_date($member->get_date_inscription(), GUESS_DATE_FR).'</td>
+          <td>'.guess_time($member->get_date_inscription(), GUESS_DATE_FR).'</td>
           <td><a href="'.htmlentities_utf8(get_page_url('admin_member_mod', true, array('id' => $member->get_id()))).'"><img src="'.IMG.'img_html/pencil.png" alt="Modifier" title="Modifier"/></a></td>
         </tr>';
     }

@@ -49,9 +49,6 @@
       $url = get_page_url('mon-compte');
     }
 
-    //A retirer
-    $url = get_page_url('mon-compte');
-
     if($membre->get_niveau() == 2) {
       $url = get_page_url('admin_member');
     }

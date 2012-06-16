@@ -61,6 +61,7 @@
     while($row = mysql_fetch_assoc($res)) {
       if( $row['Comment'] == '') $row['Comment'] = to_readable($row['Field']);
       if( $row['Key'] == 'PRI' ) $primary_keys[ $table_name ][] = $row['Field'];
+      if( $row['Key'] == 'MUL' ) $primary_keys[ $table_name ][] = $row['Field'];
 
       // Détermination des classes PHP à ajouter
       if( $row['Field'] == 'id' ) {
