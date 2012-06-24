@@ -35,18 +35,19 @@ function match_host($host, $match) {
   return substr($host, -strlen($match)) == $match;
 }
 
-$host_array = explode('|', PROD_HOST);
-$flag_prod = false;
-do {
+if( !isset( $flag_prod ) ) {
+  $host_array = explode('|', PROD_HOST);
+  $flag_prod = false;
+  do {
   $flag_prod = $flag_prod || match_host( $_SERVER['HTTP_HOST'], current($host_array));
-}while(!$flag_prod && next($host_array));
-
-
+  }while(!$flag_prod && next($host_array));
+}
 /**
  * Configurations basées sur l'environnement
  */
 if( $flag_prod) {
   define('PROD', true);
+  error_reporting(E_ALL);
   /**
    * Flag URL Rewriting local (génération des url)
    *
@@ -60,6 +61,7 @@ if( $flag_prod) {
   define('DB_USER', 'root');
   define('DB_PASS', '');
   define('DB_BASE', 'base');
+  define('MYSQLDUMP_PATH', '');
 
   // Configuration envoi de mail
   define("SMTP_HOST", "");
@@ -77,6 +79,7 @@ if( $flag_prod) {
   define('DB_USER', 'root');
   define('DB_PASS', '');
   define('DB_BASE', 'borderlines');
+  define('MYSQLDUMP_PATH', 'C:\PROGRA~1\wamp\bin\mysql\mysql5.5.16\bin\\');
 
   define("SMTP_HOST", "");
   define("SMTP_USER", "");
