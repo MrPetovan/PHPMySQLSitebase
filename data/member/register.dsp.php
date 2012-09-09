@@ -5,19 +5,6 @@
   $show_formulaire_member = true;
   $html_msg = '';
 
-  if($member = Member::get_logged_user()) {
-    $member = Member::get_current_user();
-
-    //Admin ou Compte entreprise
-    if($member->get_niveau() > 0){
-      page_redirect('dashboard');
-    }
-  }
-
-  if( !isset( $member_register )) {
-    $member_register = Member::instance();
-  }
-
   if(isset($_SESSION['tab_error'])) {
     $tab_error = $_SESSION['tab_error'];
     unset($_SESSION['tab_error']);
@@ -35,17 +22,14 @@
           $js_msg .= '- '.strip_tags($msg_error).'\n';
           $html_msg .= '<p>'.$msg_error.'</p>';
         }
-        $html_msg .= '</div>
-        <script type="text/javascript">
-          alert("Le formulaire a rencontré les erreurs suivantes :\n'.$js_msg.'")
-        </script';
+        $html_msg .= '</div>';
       }
     }
   }
-
 ?>
+<h2>Register</h2>
 <?php echo $html_msg ?>
 <form action="<?php echo get_page_url('register')?>" method="post" class="formulaire register">
-<?php echo $member_register->html_get_register_form()?>
+<?php echo $member_register->html_get_abonnement_form()?>
 <p class="center"><label>&nbsp;</label><?php echo HTMLHelper::genererInputSubmit('submit_register', 'Je m\'inscris' );?></p>
 </form>
