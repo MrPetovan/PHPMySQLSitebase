@@ -39,7 +39,7 @@ if( !isset( $flag_prod ) ) {
   $host_array = explode('|', PROD_HOST);
   $flag_prod = false;
   do {
-  $flag_prod = $flag_prod || match_host( $_SERVER['HTTP_HOST'], current($host_array));
+    $flag_prod = $flag_prod || match_host( $_SERVER['HTTP_HOST'], current($host_array));
   }while(!$flag_prod && next($host_array));
 }
 /**
