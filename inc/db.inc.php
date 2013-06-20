@@ -50,7 +50,7 @@
 			if(is_null($value)) {
 				$return = 'NULL';
 			}elseif(is_numeric($value)) {
-				$return = $value;
+				$return = number_format($value, get_dec_count( $value ), '.','');
 			}elseif(is_array($value)) {
 				foreach ($value as $key => $value_item) {
 					$values[$key] = mysql_ureal_escape_string($value_item);
@@ -65,8 +65,17 @@
 
 	function mysql_uquery($query, $link_identifier = null) {
 		if(DEBUG_SQL) {
-      mysql_log($query);
+			mysql_log($query);
 		}
+
+		$queries = preg_split("/;+(?=([^'|^\\\']*['|\\\'][^'|^\\\']*['|\\\'])*[^'|^\\\']*[^'|^\\\']$)/", $query);
+		$query = array_pop( $queries );
+		if( count( $queries ) > 0 ) {
+			foreach( $queries as $subquery ) {
+				mysql_uquery($subquery, $link_identifier);
+			}
+		}
+
 		if(is_null($link_identifier)) {
 			$res = mysql_query($query);
 		}else {
@@ -133,11 +142,32 @@
   function mysql_fetch_to_array( $res ) {
     $return = array();
 
+  if( $res !== null ) {
     while( $row = mysql_fetch_assoc($res ) ) {
+      foreach ($row as $param => $value) {
+        $row[$param] = correctype($value);
+      }
       $return[] = $row;
     }
     mysql_free_result($res);
+  }
 
     return $return;
   }
+function mysql_fetch_one($query) {
+  $return = null;
+
+  $res = mysql_uquery($query);
+
+  if( $res !== null ) {
+    $row = mysql_fetch_row($res);
+    if( is_array($row) ) {
+      $return = correctype($row[0]);
+    }
+    mysql_free_result($res);
+  }
+
+  return $return;
+}
+
 ?>
