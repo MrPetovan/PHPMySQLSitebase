@@ -7,6 +7,8 @@
 
   session_start();
 
+  ob_start();
+
   /**
    * Détermination des PATH et URL absolus pour être utilisés dans tout le site
    *
@@ -30,6 +32,8 @@
   define('DATA', DIR_ROOT.'data/');
   // PATH du répertoire d'inclusions
   define('INC', DIR_ROOT.'inc/');
+  // PATH du répertoire de librairies
+  define('LIB', DIR_ROOT.'lib/');
   // PATH du répertoire des templates
   define('TPL', DIR_ROOT.'template/');
   // URL du répertoire des images
@@ -41,6 +45,12 @@
 
   // Constante de debug SQL général
   define('DEBUG_SQL', false);
+
+  set_include_path(implode(PATH_SEPARATOR, array(
+    INC,
+    LIB,
+    get_include_path(),
+  )));
 
   // Suppression des antislashes
   if (get_magic_quotes_gpc()) {
@@ -63,6 +73,10 @@
   require_once(INC.'db.inc.php');
   // Fonctions générales
   require_once(INC.'fonctions.inc.php');
+  // i18n functions
+  require_once(INC.'i18n.inc.php');
+  // Extending GD functions
+  require_once(INC.'gd.inc.php');
   // Fonctions liées aux pages
   require_once(INC.'page.inc.php');
   // Fonctions système de fichier
@@ -89,13 +103,11 @@
     }
     if(isset($_GET[PARAM_PAGE])) {
       $PAGE_CODE = $_GET[PARAM_PAGE];
+      unset($_GET[PARAM_PAGE]);
     }else {
       $PAGE_CODE = PAGE_DEFAUT;
     }
 
-    if(isset($_POST) && count($_POST)) {
-      $flag_action = true;
-    }
     $CURRENT_PAGE = Page::db_get_page_by_code( $PAGE_CODE );
 
     if($CURRENT_PAGE) {
@@ -112,7 +124,6 @@
 
         $_SESSION['origin'] = $_GET['origin'];
         unset($_GET['origin']);
-        unset($_GET[PARAM_PAGE]);
       }
       if(isset($_GET['email']) && !Member::get_logged_user()) {
         if($member = Member::db_get_membre_by_email($_GET['email'])) {
@@ -150,30 +161,51 @@
     }else {
       $PAGE_CODE = PAGE_ERROR;
       $CURRENT_PAGE = Page::db_get_page_by_code( $PAGE_CODE );
-      $flag_action = false;
     }
   }
 
   $CURRENT_USER = Member::get_current_user();
 
+  //setlocale( LC_TIME, 'en_US.UTF8');
+  $locale = null;
+  if( isset($_POST['setlocale']) ) {
+    $locale = $_POST['locale'];
+  }else {
+    if( isset($_COOKIE['locale']) ) {
+      $locale = $_COOKIE['locale'];
+    }elseif( isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] )) {
+      $locale = str_replace( '-', '_', array_pop( array_reverse( explode( ',', $_SERVER['HTTP_ACCEPT_LANGUAGE']) ) ) );
+    }
+  }
+
+  if( !in_array( $locale, $locale_array = explode(',', LOCALES ) ) ) {
+    $locale = $locale_array[0];
+  }
+
+  setcookie("locale", $locale, time() + 30 * 24 * 3600);
+
+  define('LOCALE', $locale);
+
+  $i18n_replacements = load_translations( $locale );
+
+  setlocale(LC_ALL, $locale . '.utf8' );
+
   define('PAGE_CODE', $PAGE_CODE);
   // ACT
   if($CURRENT_PAGE->get_act()) {
-    include($CURRENT_PAGE->get_act());
+    require($CURRENT_PAGE->get_act());
   }
 
   //DSP
-  // error_log('[Geo] index.php page='.$PAGE_CODE.' '.var_export($CURRENT_PAGE,true));
-
   if($CURRENT_PAGE->get_dsp()) {
     $PAGE_TITRE = '';
-    $PAGE_CONTENU = '';
 
-    ob_start();
-    include($CURRENT_PAGE->get_dsp());
     $PAGE_CONTENU = ob_get_clean();
+    ob_start();
+    require($CURRENT_PAGE->get_dsp());
+    $PAGE_CONTENU = $PAGE_CONTENU . ob_get_clean();
 
-    include(TPL.$CURRENT_PAGE->get_tpl_file());
+    require(TPL.$CURRENT_PAGE->get_tpl_file());
 
   }
 
