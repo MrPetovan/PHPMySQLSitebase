@@ -15,7 +15,7 @@
            $result = $result.' '.$attr_name.'="'.$attr_name.'"';
             break;
           default:
-            $result = $result.' '.$attr_name.'="'.$attributs[$attr_name].'"';
+            $result = $result.' '.$attr_name.'="'.wash_utf8( $attributs[$attr_name] ).'"';
             break;
         }
       }
@@ -77,6 +77,10 @@
       return $return;
     }
     
+    public static function button( $name = null, $valeur_defaut = null, $attributs = array(), $label_text = null ) {
+      return self::genererButton( $name, $valeur_defaut, $attributs, $label_text);
+    }
+
     public static function genererButton( $name = null, $valeur_defaut = null, $attributs = array(), $label_text = null )
     {
       $return = '';
