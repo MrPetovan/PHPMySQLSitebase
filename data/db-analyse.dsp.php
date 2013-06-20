@@ -91,13 +91,23 @@
 
 
     // Gestion des clés étrangères non triviales
-    $sql_fk = "SELECT `COLUMN_NAME`, `REFERENCED_TABLE_NAME`
+    $sql_fk = "
+SELECT k_c_u_column.`COLUMN_NAME`, k_c_u_column.`REFERENCED_TABLE_NAME`
+FROM (
+  SELECT `REFERENCED_TABLE_NAME`, `CONSTRAINT_SCHEMA`, `TABLE_NAME`, `REFERENCED_COLUMN_NAME`, MIN(`CONSTRAINT_NAME`) AS `MIN_CONSTRAINT_NAME`
 FROM `information_schema`.`KEY_COLUMN_USAGE`
 WHERE `CONSTRAINT_SCHEMA` = ".mysql_ureal_escape_string(DB_BASE)."
 AND `TABLE_NAME` = ".mysql_ureal_escape_string($table_name)."
 AND `REFERENCED_COLUMN_NAME` = 'id'
-GROUP BY `REFERENCED_TABLE_NAME`";
-
+  GROUP BY `REFERENCED_TABLE_NAME`
+) k_c_u_unique
+JOIN `information_schema`.`KEY_COLUMN_USAGE` k_c_u_column
+  ON k_c_u_column.`CONSTRAINT_SCHEMA` = k_c_u_unique.`CONSTRAINT_SCHEMA`
+  AND k_c_u_column.`TABLE_NAME` = k_c_u_unique.`TABLE_NAME`
+  AND k_c_u_column.`REFERENCED_TABLE_NAME` = k_c_u_unique.`REFERENCED_TABLE_NAME`
+  AND k_c_u_column.`REFERENCED_COLUMN_NAME` = k_c_u_unique.`REFERENCED_COLUMN_NAME`
+  AND k_c_u_column.`CONSTRAINT_NAME` = k_c_u_unique.`MIN_CONSTRAINT_NAME`
+ORDER BY `CONSTRAINT_NAME`";
     $res_fk = mysql_uquery($sql_fk);
 
     while($row_fk = mysql_fetch_row($res_fk)) {
@@ -135,9 +145,9 @@ GROUP BY `REFERENCED_TABLE_NAME`";
   }
 
   $sql = "REPLACE INTO `page` (`code`, `act`, `dsp`, `login_required`, `admin_required`, `tpl`, `rewrite_pattern`) VALUES
-  ('admin_CLASS', 'data/admin/admin_CLASS.act.php', 'data/admin/admin_CLASS.dsp.php', 1, 1, '', ''),
-  ('admin_CLASS_view', 'data/admin/admin_CLASS_view.act.php', 'data/admin/admin_CLASS_view.dsp.php', 1, 1, '', '{page}/{id}.html'),
-  ('admin_CLASS_mod', 'data/admin/admin_CLASS_mod.act.php', 'data/admin/admin_CLASS_mod.dsp.php', 1, 1, '', '')
+  ('admin_CLASS', 'data/admin/admin_CLASS.act.php', 'data/admin/admin_CLASS.dsp.php', 1, 1, 'pagelayout_admin.tpl.php', ''),
+  ('admin_CLASS_view', 'data/admin/admin_CLASS_view.act.php', 'data/admin/admin_CLASS_view.dsp.php', 1, 1, 'pagelayout_admin.tpl.php', '{page}/{id}.html'),
+  ('admin_CLASS_mod', 'data/admin/admin_CLASS_mod.act.php', 'data/admin/admin_CLASS_mod.dsp.php', 1, 1, 'pagelayout_admin.tpl.php', '')
   ";
 
   $processed_classes = array_diff( $php_classes_ord, $reserved_class_list );
@@ -229,14 +239,14 @@ GROUP BY `REFERENCED_TABLE_NAME`";
   echo '<p>'.count( $unchanged_file_list ).' files unchanged</p>';
   
   // Sauvegarde de la structure de la base
-  $command = MYSQLDUMP_PATH.'mysqldump --no-data --host="'.DB_HOST.'" --user="'.DB_USER.'" --password="'.DB_PASS.'" "'.DB_BASE.'" 2>&1 > "'.DATA.'database_structure_'.date('Ymd').'.sql"';
+  $command = MYSQLDUMP_PATH.'mysqldump --no-data --host="'.DB_HOST.'" --user="'.DB_USER.'" --password="'.DB_PASS.'" "'.DB_BASE.'" 2>&1 > "'.DIR_ROOT.'archive/database_structure_'.date('Ymd').'.sql"';
   $return_var = null;
   $output = array();
   exec( $command, $output, $return_var );
   
   if( $return_var === 0 ) {
     echo '
-    <p>Database structure saved in '.DATA.'database_structure_'.date('Ymd').'.sql</p>';
+    <p>Database structure saved in '.DIR_ROOT.'archive/database_structure_'.date('Ymd').'.sql</p>';
   }else {
     echo '<p>Error while saving database structure</p>
     <p>'.implode('<br/>', $output).'</p>';
