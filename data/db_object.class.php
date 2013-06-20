@@ -138,7 +138,8 @@
           // Appelle __get
           return $this->$var;
         }else {
-          error_log('[Framework] __call:get : Class variable doesn\'t exist : '.$var);
+          $debug_backtrace = debug_backtrace();
+          error_log('[Framework] __call:get : Class variable doesn\'t exist : '.$var.' '. $debug_backtrace[2]['file']. ' ['. $debug_backtrace[2]['line'].']');
           throw new Exception('[Framework] __call:get : Class variable doesn\'t exist : '.$var);
           return null;
         }
@@ -152,7 +153,8 @@
           $this->$var = $value;
           $return = true;
         }else {
-          error_log('[Framework] __call:set : Class variable doesn\'t exist : '.$var);
+          $debug_backtrace = debug_backtrace();
+          error_log('[Framework] __call:set : Class variable doesn\'t exist : '.$var.' '. $debug_backtrace[2]['file']. ' ['. $debug_backtrace[2]['line'].']');
           throw new Exception('[Framework] __call:set : Class variable doesn\'t exist : '.$var);
           return null;
         }
@@ -174,7 +176,24 @@
       $array = get_object_vars($this);
       foreach ( $array as $key => $value ) {
         if( strpos( $key, '_' ) === 0 ) {
-          $return[ substr( $key, 1 ) ] = $value;
+          $return[ substr( $key, 1 ) ] = $this->__get(substr( $key, 1 ));
+        }
+      }
+      return $return;
+    }
+
+    /**
+     * Retourne un tableau clé->valeur de toutes les propriétés innées (=SQL)
+     * de l'objet. Ces propriétés sont indiquées par un _ devant le nom SQL
+     *
+     * @return array
+     */
+    public function get_public_vars() {
+      $return = array();
+      $array = get_object_vars($this);
+      foreach ( $array as $key => $value ) {
+        if( strpos( $key, '_' ) === 0 ) {
+          $return[ substr( $key, 1 ) ] = $this->__get(substr( $key, 1 ));
         }
       }
       return $return;
@@ -253,7 +272,8 @@
 
         foreach($data as $var_name => $value) {
           $var_name = "_$var_name";
-          $this->$var_name = $value;
+
+          $this->$var_name = correctype( $value );
         }
 
         $return = true;
@@ -276,9 +296,9 @@
     public function save($flags = 0) {
       if($return = ($this->check_valid($flags) === true)) {
         if(is_null($this->get_id())) {
-          return $this->db_add();
+          $return = $this->db_add();
         }else {
-          return $this->db_update();
+          $return = $this->db_update();
         }
       }
       return $return;
@@ -297,9 +317,9 @@
     public function db_save($flags = 0) {
       if(($return = $this->check_valid($flags)) === true) {
         if(is_null($this->get_id())) {
-          return $this->db_add();
+          $return = $this->db_add();
         }else {
-          return $this->db_update();
+          $return = $this->db_update();
         }
       }
       return $return;
@@ -566,6 +586,9 @@ WHERE `id` = ".mysql_ureal_escape_string($this->get_id());
         $sql_name = '_'.$name;
         
         if($name != "id" && property_exists( $this, $sql_name ) ) {
+          if( is_array( $this->$name ) && is_string( $value ) ) {
+            $value = string_to_parameters( $value );
+          }
           $this->$name = $value;
         }
       }
