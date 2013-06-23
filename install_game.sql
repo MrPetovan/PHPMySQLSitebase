@@ -215,7 +215,7 @@ CREATE TABLE IF NOT EXISTS `shout` (
   `shouter_id` int(11) NOT NULL,
   `text` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `shouter_id` (`shouter_id`),
+  KEY `shouter_id` (`shouter_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=550 ;
 
 --
